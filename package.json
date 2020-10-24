@@ -1,0 +1,31 @@
+{
+  "name": "ws-automock-sandbox",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start-client": "http-server . -o",
+    "start-server": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/larsthorup/ws-automock-sandbox.git"
+  },
+  "keywords": [],
+  "author": "Lars Thorup <lars@zealake.com> (https://www.zealake.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/larsthorup/ws-automock-sandbox/issues"
+  },
+  "homepage": "https://github.com/larsthorup/ws-automock-sandbox#readme",
+  "dependencies": {
+    "ws": "^7.3.1"
+  },
+  "devDependencies": {
+    "http-server": "^0.12.3"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "es5"
+  }
+}
