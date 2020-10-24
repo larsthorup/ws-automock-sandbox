@@ -2,12 +2,20 @@ let ws;
 
 const jobId = '4711'; // Note: eventually a UUID
 
-const init = () => {
+export const initClient = (rootElement) => {
+  console.log(rootElement);
+  rootElement.innerHTML = `
+    <h1>Job Runner</h1>
+    <p id="connection-indicator">Connecting...</p>
+    <button id="submit-button">Submit</button>
+    <p id="progress-indicator">Progress: <span id="progress-value"></span></p>
+    <p id="result-indicator">Result: <span id="result-value"></span></p>
+  `;
   document.querySelector('#submit-button').style.display = 'none';
   document.querySelector('#progress-indicator').style.display = 'none';
   document.querySelector('#result-indicator').style.display = 'none';
   document.querySelector('#submit-button').addEventListener('click', onSubmit);
-  ws = new WebSocket('ws://localhost:8081');
+  ws = new window.WebSocket('ws://localhost:8081');
   ws.onerror = () => {
     setConnectionStatus('Connection error');
   };
@@ -57,5 +65,3 @@ const onSubmit = () => {
   document.querySelector('#progress-indicator').style.display = 'block';
   ws.send(JSON.stringify({ cmd: 'job-request', id: jobId }));
 };
-
-init();
