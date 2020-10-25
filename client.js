@@ -3,7 +3,6 @@ let ws;
 const jobId = '4711'; // Note: eventually a UUID
 
 export const initClient = (rootElement) => {
-  console.log(rootElement);
   rootElement.innerHTML = `
     <h1>Job Runner</h1>
     <p id="connection-indicator">Connecting...</p>
@@ -20,14 +19,14 @@ export const initClient = (rootElement) => {
     setConnectionStatus('Connection error');
   };
   ws.onopen = () => {
-    setConnectionStatus('Connection being negotiated');
+    setConnectionStatus('Connection initiated');
   };
   ws.onclose = () => {
     setConnectionStatus('Disconnected');
     ws = null;
   };
   ws.onmessage = ({ data }) => {
-    console.log(data);
+    console.log('client: received:', data);
     const message = JSON.parse(data);
     switch (message.cmd) {
       case 'connected':
