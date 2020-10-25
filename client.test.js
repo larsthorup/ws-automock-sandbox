@@ -9,6 +9,16 @@ const recording = {
   messageList: [
     { message: { cmd: 'connected' }, send: false, label: 'connected' },
     { message: { cmd: 'job-request', id: '4711' }, send: true },
+    {
+      message: { cmd: 'job-progress', id: '4711', fraction: 0.5 },
+      send: false,
+      label: 'progress',
+    },
+    {
+      message: { cmd: 'job-result', id: '4711', result: 66 },
+      send: false,
+      label: 'result',
+    },
   ],
 };
 
@@ -64,5 +74,25 @@ describe('client', function () {
       'block'
     );
     expect(screen.querySelector('#progress-value').textContent).to.equal('0%');
+
+    // when: server reports progress
+    ws.playUntil('progress');
+
+    // then: progress indicator display updated
+    expect(screen.querySelector('#progress-value').textContent).to.equal('50%');
+
+    // when: server reports result
+    ws.playUntil('result');
+
+    // then: progress indicator not displayed
+    expect(screen.querySelector('#progress-indicator').style.display).to.equal(
+      'none'
+    );
+
+    // then: result is displayed
+    expect(screen.querySelector('#result-indicator').style.display).to.equal(
+      'block'
+    );
+    expect(screen.querySelector('#result-value').textContent).to.equal('66');
   });
 });
