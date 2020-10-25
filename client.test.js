@@ -4,6 +4,10 @@ import { WebSocketMockController } from './ws-automock.js';
 
 const { expect } = window.chai;
 
+const getProgressValue = (screen) => {
+  return parseInt(screen.querySelector('#progress-value').textContent);
+};
+
 describe('client', function () {
   let recording;
   let screen;
@@ -65,8 +69,18 @@ describe('client', function () {
     // then: progress indicator display updated
     expect(screen.querySelector('#progress-value').textContent).to.equal('0%');
 
-    // TODO: wsMock.playNext();
-    // TODO: increasing progress value
+    // when: server reports further progress
+    wsMock.playNext();
+    const p1 = getProgressValue(screen);
+    wsMock.playNext();
+    const p2 = getProgressValue(screen);
+    wsMock.playNext();
+    const p3 = getProgressValue(screen);
+
+    // then: progress indicator display show increasing progress value
+    expect(p1).to.be.above(0);
+    expect(p2).to.be.above(p1);
+    expect(p3).to.be.above(p2);
 
     // when: server reports result
     wsMock.playUntil('result');

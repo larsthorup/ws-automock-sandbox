@@ -5,21 +5,29 @@ class WebSocketMock {
     wsList.push(this);
     this.nextMessageIndex = 0;
   }
+  playNext() {
+    const { label, data, send } = this.recording.messageList[
+      this.nextMessageIndex
+    ];
+    if (!send) {
+      console.log('wsAutoMock: WebSocketMock: play: ', data);
+      this.onmessage({ data });
+      ++this.nextMessageIndex;
+    } else {
+      throw new Error(`Expected send("${data}") but got playNext()`);
+    }
+  }
   playUntil(expectedLabel) {
     while (this.nextMessageIndex < this.recording.messageList.length) {
-      const { label, data, send } = this.recording.messageList[
-        this.nextMessageIndex
-      ];
+      const { label, send } = this.recording.messageList[this.nextMessageIndex];
       if (!send) {
-        console.log('wsAutoMock: WebSocketMock: play: ', data);
-        this.onmessage({ data });
-        ++this.nextMessageIndex;
-        if (label === expectedLabel) break;
+        this.playNext();
       } else {
         throw new Error(
           `Expected send("${data}") but got playUntil("${expectedLabel}")`
         );
       }
+      if (label === expectedLabel) break;
     }
   }
   send(data) {
