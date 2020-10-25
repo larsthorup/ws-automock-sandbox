@@ -7,10 +7,9 @@ class WebSocketMock {
   }
   playUntil(expectedLabel) {
     while (this.nextMessageIndex < this.recording.messageList.length) {
-      const { label, message, send } = this.recording.messageList[
+      const { label, data, send } = this.recording.messageList[
         this.nextMessageIndex
       ];
-      const data = JSON.stringify(message);
       if (!send) {
         console.log('wsAutoMock: WebSocketMock: play: ', data);
         this.onmessage({ data });
@@ -25,10 +24,9 @@ class WebSocketMock {
   }
   send(data) {
     if (this.nextMessageIndex < this.recording.messageList.length) {
-      const { message, send } = this.recording.messageList[
+      const { data: expectedData, send } = this.recording.messageList[
         this.nextMessageIndex
       ];
-      const expectedData = JSON.stringify(message);
       if (send) {
         // TODO: deep equality
         if (expectedData === data) {
@@ -66,5 +64,43 @@ export class WebSocketMockController {
     const wsMock = wsList.pop();
     wsMock.recording = recording;
     return wsMock;
+  }
+}
+
+export class WebSocketRecorder {
+  constructor(ws) {
+    this.ws = ws;
+    this.messageList = [];
+    ws.onmessage = ({ data }) => {
+      const { expector, messageList } = this;
+      const { messageSubset, label, resolve } = expector;
+      console.log('receiving', data);
+      const message = JSON.parse(data);
+      if (message.cmd === messageSubset.cmd) {
+        console.log('match', label);
+        messageList.push({ data, send: false, label });
+        resolve();
+      } else {
+        messageList.push({ data, send: false });
+      }
+    };
+  }
+
+  send(data) {
+    const { messageList, ws } = this;
+    console.log('sending', data);
+    messageList.push({ data, send: true });
+    ws.send(data);
+  }
+
+  getRecording() {
+    const { messageList } = this;
+    return JSON.stringify({ messageList }, null, 2);
+  }
+
+  async waitFor(messageSubset, label) {
+    return new Promise((resolve) => {
+      this.expector = { messageSubset: messageSubset, label, resolve };
+    });
   }
 }

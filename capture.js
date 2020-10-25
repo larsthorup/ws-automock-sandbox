@@ -1,33 +1,22 @@
-const WebSocket = require('ws');
+import fs from 'fs';
+import WebSocket from 'ws';
+import { WebSocketRecorder } from './ws-automock.js';
 
-let expector;
-
-const ws = new WebSocket('ws://localhost:8081');
-
-ws.onmessage = ({ data }) => {
-  const message = JSON.parse(data);
-  console.log(message);
-  if (message.cmd === expector.messageSubset.cmd) {
-    console.log('match', expector.label);
-    expector.resolve();
+const capturing = async () => {
+  const ws = new WebSocket('ws://localhost:8081');
+  try {
+    const wsRecorder = new WebSocketRecorder(ws);
+    await wsRecorder.waitFor({ cmd: 'connected' }, 'connected');
+    wsRecorder.send(JSON.stringify({ cmd: 'job-request', id: '4711' }));
+    await wsRecorder.waitFor({ cmd: 'job-progress' }, 'progress');
+    await wsRecorder.waitFor({ cmd: 'job-result' }, 'result');
+    fs.mkdirSync('output', { recursive: true });
+    fs.writeFileSync('output/recording.json', wsRecorder.getRecording());
+  } catch (ex) {
+    console.error(ex);
+  } finally {
+    ws.close();
   }
 };
 
-const waitFor = async (messageSubset, label) => {
-  return new Promise((resolve) => {
-    expector = { messageSubset: messageSubset, label, resolve };
-  });
-};
-
-const capturing = async () => {
-  await waitFor({ cmd: 'connected' }, 'connected');
-  ws.send(JSON.stringify({ cmd: 'job-request', id: '4711' }));
-  await waitFor({ cmd: 'job-progress' }, 'progress');
-  await waitFor({ cmd: 'job-result' }, 'result');
-};
-
-capturing()
-  .catch(console.error)
-  .finally(() => {
-    ws.close();
-  });
+capturing().catch(console.error);

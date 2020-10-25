@@ -4,29 +4,13 @@ import { WebSocketMockController } from './ws-automock.js';
 
 const { expect } = window.chai;
 
-// TODO: read from capture file
-const recording = {
-  messageList: [
-    { message: { cmd: 'connected' }, send: false, label: 'connected' },
-    { message: { cmd: 'job-request', id: '4711' }, send: true },
-    {
-      message: { cmd: 'job-progress', id: '4711', fraction: 0.5 },
-      send: false,
-      label: 'progress',
-    },
-    {
-      message: { cmd: 'job-result', id: '4711', result: 66 },
-      send: false,
-      label: 'result',
-    },
-  ],
-};
-
 describe('client', function () {
+  let recording;
   let screen;
   let wsMockController;
 
-  beforeEach(function () {
+  beforeEach(async function () {
+    recording = await (await fetch('/output/recording.json')).json();
     screen = document.querySelector('#fixture');
     wsMockController = new WebSocketMockController(window);
   });
@@ -51,10 +35,10 @@ describe('client', function () {
     expect(screen.querySelector('#connection-indicator').textContent).to.equal(
       'Connecting...' // TODO: Connection initiated
     );
-    const ws = wsMockController.popConnection(recording);
+    const wsMock = wsMockController.popConnection(recording);
 
     // when: server connects
-    ws.playUntil('connected');
+    wsMock.playUntil('connected');
 
     // then: submit button is displayed
     expect(screen.querySelector('#submit-button').style.display).to.equal(
@@ -76,13 +60,16 @@ describe('client', function () {
     expect(screen.querySelector('#progress-value').textContent).to.equal('0%');
 
     // when: server reports progress
-    ws.playUntil('progress');
+    wsMock.playUntil('progress');
 
     // then: progress indicator display updated
-    expect(screen.querySelector('#progress-value').textContent).to.equal('50%');
+    expect(screen.querySelector('#progress-value').textContent).to.equal('0%');
+
+    // TODO: wsMock.playNext();
+    // TODO: increasing progress value
 
     // when: server reports result
-    ws.playUntil('result');
+    wsMock.playUntil('result');
 
     // then: progress indicator not displayed
     expect(screen.querySelector('#progress-indicator').style.display).to.equal(
@@ -93,6 +80,6 @@ describe('client', function () {
     expect(screen.querySelector('#result-indicator').style.display).to.equal(
       'block'
     );
-    expect(screen.querySelector('#result-value').textContent).to.equal('66');
+    expect(screen.querySelector('#result-value').textContent).to.equal('42');
   });
 });
