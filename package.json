@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start-client": "http-server . -o",
-    "start-server": "node server.js"
+    "start:client": "http-server . -o",
+    "start:server": "node server.js",
+    "test:capture": "node capture.js"
   },
   "repository": {
     "type": "git",
