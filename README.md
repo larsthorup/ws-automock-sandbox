@@ -13,13 +13,13 @@ Auto-mocking benefits include
 npm install
 ```
 
-## Terminal window 1
+## Run server (terminal 1)
 
 ```shell
 npm run start:server
 ```
 
-## Terminal window 2
+## Capture test (terminal 2)
 
 Create capture file for auto mocking in tests:
 
@@ -27,12 +27,14 @@ Create capture file for auto mocking in tests:
 npm run test:capture
 ```
 
-Run tests: open http://localhost:8080/mocha.html
+## Client and client test (terminal 3)
 
-## Terminal window 3
-
-Run client:
+Server front-end:
 
 ```shell
 npm run start:client
 ```
+
+Run tests: open http://localhost:8080/mocha.html
+
+Run client: http://localhost:8080/
